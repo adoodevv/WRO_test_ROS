@@ -25,4 +25,23 @@ class Camera:
 
 
 class Navigator:
-    
+    def init(self):
+        self.wall_follower = WallFollower()
+        self.camera = Camera()
+
+        def run(self):
+            rospy.init_node('navigator', anonymous = True)
+            rate = rospy.Rate(10)
+
+            while not rospy.is_shutdown():
+                #Use data from wall follower and camera to make navigation decisions
+                #Publish commands to control robot movement
+                 cmd_vel = Twist()
+                 cmd_vel.linear.x = 0.2
+                 cmd_vel.angular.z = 0.1
+                 self.wall_follower.cmd_vel_pub.publish(cmd_vel)
+                 rate.sleep()
+
+if name == 'main':
+    navigator = Navigator()
+    navigator.run()
