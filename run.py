@@ -5,6 +5,12 @@ import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 
+import rplidar
+import RPi.GPIO as GPIO
+
+PORT_NAME = '/dev/ttyUSB0' # Replace with actual port name of the RPLidar
+lidar = rplidar.RPLidar(PORT_NAME)
+
 class WallFollower:
     def init(self):
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
