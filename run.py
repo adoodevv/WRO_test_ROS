@@ -8,6 +8,9 @@ from geometry_msgs.msg import Twist
 import rplidar
 import RPi.GPIO as GPIO
 
+import cv2
+from cv_bridge import CvBridge, CvBridgeError
+
 PORT_NAME = '/dev/ttyUSB0' # Replace with actual port name of the RPLidar
 lidar = rplidar.RPLidar(PORT_NAME)
 
@@ -24,10 +27,32 @@ class WallFollower:
 class Camera:
     def init(self):
         self.sub = rospy.Subscriber('/camera/image_raw', Image, self.process_image)
+        self.bridge = CvBridge()
+        self.red_lower = (0, 0, 100)
+        self.red_upper = (10, 10, 255)
+        self.green_lower = (0, 100, 0)
+        self.green_upper = (10, 255, 10)
         
         def process_image(self, msg):
-            #Process image data to detect obstacles
-            pass
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+            except CvBridgeError as e:
+                print(e)
+
+            #Thresholding
+            red_mask = cv2.inRange(bgr, self.red_lower, self.red_upper)
+            green_mask = cv2. inRange(bgr, self.green_lower, self.green_upper)
+
+            #Finding contours
+            red_contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            green_contours, _ = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+            #Drawing contours on image
+            cv2.drawContours(cv_image, red_contours, -1, (0, 0, 255), 2)
+            cv2.drawContours(cv_image, green_contours, -1, (0, 255, 0), 2)
+
+            cv2.imshow('Image', cv_image)
+            cv2.waitKey(3)
 
 
 class Navigator:
